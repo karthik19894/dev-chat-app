@@ -47,8 +47,8 @@ class Channels extends Component {
 			details: channelDetails,
 			createdBy: {
 				uid: currentUser.uid,
-				name: currentUser.name,
-				avatar: currentUser.photoUrl,
+				name: currentUser.displayName,
+				avatar: currentUser.photoURL,
 			},
 		};
 		channelsRef
