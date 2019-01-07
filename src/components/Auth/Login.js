@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Grid, Form, Segment, Button, Header, Message, Icon } from 'semantic-ui-react';
 import firebase from '../../firebase';
+import { Link } from 'react-router-dom';
 
 class Login extends Component {
 	state = {
@@ -95,6 +96,9 @@ class Login extends Component {
 							{this.displayErrors(errors)}
 						</Message>
 					)}
+					<Message>
+						Don't have an account? <Link to="/register">Register</Link>
+					</Message>
 				</Grid.Column>
 			</Grid>
 		);
