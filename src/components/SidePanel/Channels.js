@@ -6,7 +6,7 @@ import { setCurrentChannel } from '../../actions';
 
 class Channels extends Component {
 	state = {
-		activeChannel: '',
+		// activeChannel: '',
 		channels: [],
 		channelName: '0',
 		channelDetails: '',
@@ -74,6 +74,14 @@ class Channels extends Component {
 		this.addListeners();
 	}
 
+	componentWillUnmount() {
+		this.removeListeners();
+	}
+
+	removeListeners = () => {
+		this.state.channelsRef.off();
+	};
+
 	addListeners = () => {
 		let loadedChannels = [];
 		this.state.channelsRef.on('child_added', snap => {
@@ -84,16 +92,16 @@ class Channels extends Component {
 				},
 				() => this.setActiveChannel()
 			);
+			this.setState({ firstLoad: false });
 		});
-		this.setState({ firstLoad: false });
 	};
 
 	setActiveChannel = () => {
+		const firstChannel = this.state.channels[0];
 		if (this.state.firstLoad && this.state.channels.length > 0) {
-			const firstChannel = this.state.channels[0];
-			this.setState({
-				activeChannel: firstChannel,
-			});
+			// this.setState({
+			// 	activeChannel: firstChannel,
+			// });
 			this.props.setCurrentChannel(firstChannel);
 		}
 	};
@@ -101,9 +109,9 @@ class Channels extends Component {
 
 	setCurrentChannel = channel => {
 		this.props.setCurrentChannel(channel);
-		this.setState({
-			activeChannel: channel,
-		});
+		// this.setState({
+		// 	activeChannel: channel,
+		// });
 	};
 	displayChannels = channels => {
 		return (
@@ -114,7 +122,7 @@ class Channels extends Component {
 					onClick={this.setCurrentChannel.bind(null, channel)}
 					name={channel.name}
 					style={{ opacity: 0.7 }}
-					active={this.state.activeChannel.id === channel.id}
+					active={this.props.channel.id === channel.id}
 				>
 					# {channel.name}
 				</Menu.Item>
@@ -124,6 +132,9 @@ class Channels extends Component {
 
 	render() {
 		const { channels, modal } = this.state;
+		if (!this.props.channel) {
+			return <div>Loading...</div>;
+		}
 		return (
 			<React.Fragment>
 				<Menu.Menu style={{ paddingBottom: '2rem' }}>
@@ -134,7 +145,7 @@ class Channels extends Component {
 						({channels.length})
 						<Icon name="add" onClick={this.openModal} />
 					</Menu.Item>
-					{this.displayChannels(channels)}
+					{this.state.channels.length > 0 && this.displayChannels(channels)}
 				</Menu.Menu>
 
 				{/* Add channel modal */}
@@ -172,7 +183,10 @@ class Channels extends Component {
 	}
 }
 
+const mapStateToProps = state => ({
+	channel: state.channels.currentChannel,
+});
 export default connect(
-	null,
+	mapStateToProps,
 	{ setCurrentChannel }
 )(Channels);
