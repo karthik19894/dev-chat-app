@@ -13,6 +13,8 @@ class Messages extends Component {
 		messages: [],
 		messagesLoading: true,
 		numUniqueUsers: 0,
+		searchTerm: '',
+		searchLoading: false,
 	};
 	addListeners = channelId => {
 		this.addMessageListener(channelId);
@@ -41,6 +43,28 @@ class Messages extends Component {
 			numUniqueUsers,
 		});
 	};
+
+	handleSearchChange = event => {
+		this.setState(
+			{
+				searchTerm: event.target.value,
+				searchLoading: true,
+			},
+			this.handleSearchMessages()
+		);
+	};
+
+	handleSearchMessages = () => {
+		const channelMessages = [...this.state.messages];
+		const regex = new RegExp(this.state.searchTerm, 'ig');
+		const searchResults = channelMessages.filter(message => {
+			return (message.content && message.content.match(regex)) || message.user.name.match(regex);
+		});
+		this.setState({
+			searchResults,
+		});
+		setTimeout(() => this.setState({ searchLoading: false }), 1000);
+	};
 	componentDidMount() {
 		const { user, channel } = this.state;
 		if (user && channel) {
@@ -48,12 +72,28 @@ class Messages extends Component {
 		}
 	}
 	render() {
-		const { messagesRef, channel, user, messages, numUniqueUsers } = this.state;
+		const {
+			messagesRef,
+			channel,
+			user,
+			messages,
+			numUniqueUsers,
+			searchTerm,
+			searchResults,
+			searchLoading,
+		} = this.state;
 		return (
 			<React.Fragment>
-				<MessagesHeader channelName={(channel && channel.name) || ''} numUniqueUsers={numUniqueUsers} />
+				<MessagesHeader
+					channelName={(channel && channel.name) || ''}
+					numUniqueUsers={numUniqueUsers}
+					onSearchChange={this.handleSearchChange}
+					searchLoading={searchLoading}
+				/>
 				<Segment>
-					<Comment.Group className="messages">{this.displayMessages(messages)}</Comment.Group>
+					<Comment.Group className="messages">
+						{searchTerm ? this.displayMessages(searchResults) : this.displayMessages(messages)}
+					</Comment.Group>
 				</Segment>
 				<MessageForm messagesRef={messagesRef} currentChannel={channel} currentUser={user} />
 			</React.Fragment>
