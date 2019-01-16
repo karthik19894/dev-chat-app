@@ -52,7 +52,7 @@ class Starred extends Component {
 						onClick={this.setCurrentChannel.bind(null, channel)}
 						name={channel.name}
 						style={{ opacity: 0.7 }}
-						active={this.props.channel.id === channel.id}
+						active={this.props.channel && this.props.channel.id === channel.id}
 					>
 						# {channel.name}
 					</Menu.Item>
