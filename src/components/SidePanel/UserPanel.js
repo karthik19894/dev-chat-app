@@ -100,7 +100,7 @@ class UserPanel extends Component {
 			.catch(err => console.error(err));
 
 		this.state.usersRef
-			.child(this.props.user.uid)
+			.child(this.props.currentUser.uid)
 			.update({ avatar: this.state.uploadedCroppedImage })
 			.then(() => console.log('User avatar updated'))
 			.catch(err => console.error(err));
