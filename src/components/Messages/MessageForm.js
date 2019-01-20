@@ -236,15 +236,15 @@ class MessageForm extends Component {
 				/>
 				<Button.Group icon widths="2">
 					<Button
-						color="orange"
+						color="violet"
 						onClick={this.sendMessage}
-						content="Add Reply"
+						content="Send Message"
 						labelPosition="left"
-						icon="edit"
+						icon="paper plane"
 						disabled={loading}
 					/>
 					<Button
-						color="teal"
+						color="olive"
 						onClick={this.openModal}
 						content="Upload Media"
 						labelPosition="right"

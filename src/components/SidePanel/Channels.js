@@ -206,7 +206,7 @@ class Channels extends Component {
 							<Icon name="exchange" /> CHANNELS
 						</span>{' '}
 						({channels.length})
-						<Icon name="add" onClick={this.openModal} />
+						<Icon name="add" onClick={this.openModal} style={{ cursor: 'pointer' }} />
 					</Menu.Item>
 					{this.state.channels.length > 0 && this.displayChannels(channels)}
 				</Menu.Menu>

@@ -13,6 +13,7 @@ class MessagesHeader extends Component {
 			handleStar,
 		} = this.props;
 		const symbol = isPrivateChannel ? '@' : '#';
+
 		return (
 			<Segment clearing>
 				{/* Channel Title */}
@@ -28,9 +29,7 @@ class MessagesHeader extends Component {
 						)}
 					</span>
 					{!isPrivateChannel && (
-						<Header.Subheader>{`${numUniqueUsers} user${
-							numUniqueUsers.length > 1 ? 's' : ''
-						}`}</Header.Subheader>
+						<Header.Subheader>{`${numUniqueUsers} user${numUniqueUsers > 1 ? 's' : ''}`}</Header.Subheader>
 					)}
 				</Header>
 				{/* Channel Search Input */}
