@@ -6,6 +6,7 @@ import firebase from '../../firebase';
 import Message from './Message';
 import { connect } from 'react-redux';
 import { setUserPosts } from '../../actions';
+import Typing from './Typing';
 
 class Messages extends Component {
 	state = {
@@ -20,6 +21,9 @@ class Messages extends Component {
 		privateMessagesRef: firebase.database().ref('privateMessages'),
 		isStarred: false,
 		usersRef: firebase.database().ref('users'),
+		typingRef: firebase.database().ref('typing'),
+		typingUsers: [],
+		connectedRef: firebase.database().ref('info/connected'),
 	};
 	handleStar = () => {
 		this.setState(
@@ -51,6 +55,48 @@ class Messages extends Component {
 	};
 	addListeners = channelId => {
 		this.addMessageListener(channelId);
+		this.addTypingListener(channelId);
+	};
+	addTypingListener = channelId => {
+		let typingUsers = [];
+		this.state.typingRef.child(channelId).on('child_added', snap => {
+			if (snap.key !== this.state.user.uid) {
+				typingUsers.concat({
+					id: snap.key,
+					name: snap.val(),
+				});
+
+				this.setState({
+					typingUsers,
+				});
+			}
+		});
+
+		this.state.typingRef.child(channelId).on('child_removed', snap => {
+			const indexOfRemovedUser = this.state.typingUsers.findIndex(user => user.id === snap.key);
+			if (indexOfRemovedUser !== -1) {
+				const updatedTypingUsers = this.state.typingUsers.filter(user => {
+					return user.id !== snap.key;
+				});
+				this.setState({
+					typingUsers: updatedTypingUsers,
+				});
+			}
+		});
+
+		this.state.connectedRef.on('value', snap => {
+			if (snap.val() === true) {
+				this.state.typingRef
+					.child(channelId)
+					.child(this.state.user.uid)
+					.onDisconnect()
+					.remove(err => {
+						if (err !== null) {
+							console.error(err);
+						}
+					});
+			}
+		});
 	};
 	addMessageListener = channelId => {
 		const ref = this.getMessagesRef();
@@ -141,6 +187,26 @@ class Messages extends Component {
 			this.addUserStarsListener(channel.id, user.uid);
 		}
 	}
+	componentDidUpdate() {
+		if (this.messagesEndRef) {
+			this.scrollToBottom();
+		}
+	}
+	scrollToBottom = () => {
+		this.messagesEndRef.scrollIntoView({ behavior: 'smooth' });
+	};
+	displayTyping = typingUsers => {
+		if (typingUsers.length > 0) {
+			return typingUsers.map(user => (
+				<div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.2em' }} key={user.id}>
+					<span className="user__typing">{user.name} is typing</span>
+					<Typing />
+				</div>
+			));
+		} else {
+			return '';
+		}
+	};
 	render() {
 		const {
 			channel,
@@ -151,6 +217,7 @@ class Messages extends Component {
 			searchResults,
 			searchLoading,
 			isStarred,
+			typingUsers,
 		} = this.state;
 		const { isPrivateChannel } = this.props;
 		return (
@@ -167,6 +234,8 @@ class Messages extends Component {
 				<Segment>
 					<Comment.Group className="messages">
 						{searchTerm ? this.displayMessages(searchResults) : this.displayMessages(messages)}
+						{this.displayTyping(typingUsers)}
+						<div ref={node => (this.messagesEndRef = node)} />
 					</Comment.Group>
 				</Segment>
 				<MessageForm
